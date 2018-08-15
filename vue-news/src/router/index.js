@@ -1,15 +1,40 @@
-import Vue from 'vue'
-import Router from 'vue-router'
-import HelloWorld from '@/components/HelloWorld'
-
+import Vue from 'vue';
+import Router from 'vue-router';
+import Video from '@/components/video/Video';
+import News from '@/components/news/News';
+import BaoMing from '@/components/baoming/Baoming';
+import Comment from '@/components/comment/Comment';
+import '../../static/css/reset.css'
+import '../common/stylus/icon.styl'
 Vue.use(Router)
-
+Vue.config.productionTip = false;
 export default new Router({
+  linkActiveClass: 'active',
+  mode: 'history',
   routes: [
     {
       path: '/',
-      name: 'HelloWorld',
-      component: HelloWorld
+      redirect: '/video'
+    },
+    {
+      path: '/video',
+      name: 'video',
+      component: Video
+    },
+    {
+      path: '/news',
+      name: 'news',
+      component: News
+    },
+    {
+      path: '/baoming',
+      name: 'baoming',
+      component: BaoMing
+    },
+    {
+      path: '/news/:id',
+      name: 'comment',
+      component: Comment
     }
   ]
 })
