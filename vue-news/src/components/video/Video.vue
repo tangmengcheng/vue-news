@@ -60,7 +60,7 @@ export default {
   },
   methods: {
     loadData() {
-      this.$ajax.get(`/api/dataNews/list.json?page=${this.page}&limit=${this.limit}&category=${this.category}`).then((res) => {
+      this.$ajax.get(`/spot/dataNews/list.json?page=${this.page}&limit=${this.limit}&category=${this.category}`).then((res) => {
         if (res.data.success) {
           if (res.data.success) {
             this.data = this.data.concat(res.data.data.list)
@@ -89,7 +89,7 @@ export default {
         return
       }
       this.page++;
-      this.$ajax.get(`/api/dataNews/list.json?page=${this.page}&limit=${this.limit}&category=${this.category}`).then((res) => {
+      this.$ajax.get(`/spot/dataNews/list.json?page=${this.page}&limit=${this.limit}&category=${this.category}`).then((res) => {
         if (res.data.success) {
           this.data = this.data.concat(res.data.data.list)
           if (this.page > res.data.data.total / this.limit) {
@@ -98,6 +98,14 @@ export default {
         }
       }).catch((err) => {
         console.log(err);
+      })
+    },
+    // 跳转到评论页
+    goTo(item) {
+      this.$router.push({
+        path: `/news/${item.id}`,
+        name: 'comment',
+        query: {data: item}
       })
     },
     _toDetail(item) {

@@ -90,7 +90,7 @@
           page: 1,
           limit: 5,
         }
-        this.$ajax.get('/api/dataNews/detail/comment/list', {params: item})
+        this.$ajax.get('/spot/dataNews/detail/comment/list', {params: item})
           .then(res => {
             this.comments = res.data.data.list
             console.log(this.comments);

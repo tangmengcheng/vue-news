@@ -22,7 +22,7 @@
                   }}
                 </div>
                 <div class="box-img">
-                  <div>
+                  <div @click="goTo(item)">
                     <img src="../../images/comment.png" alt="">
                   </div>
                   <div class="txt">{{item.comment_count}}</div>
@@ -65,7 +65,7 @@ export default {
   },
   methods: {
     loadData() {
-      this.$ajax.get(`/api/dataNews/list.json?page=${this.page}&limit=${this.limit}&category=${this.category}`).then((res) => {
+      this.$ajax.get(`/spot/dataNews/list.json?page=${this.page}&limit=${this.limit}&category=${this.category}`).then((res) => {
         if (res.data.success) {
           this.data = this.data.concat(res.data.data.list)
         }
@@ -80,19 +80,31 @@ export default {
         return
       }
       this.page++;
-      this.$ajax.get(`/api/dataNews/list.json?page=${this.page}&limit=${this.limit}&category=${this.category}`).then((res) => {
+      this.$ajax.get(`/spot/dataNews/list.json?page=${this.page}&limit=${this.limit}&category=${this.category}`).then((res) => {
         if (res.data.success) {
+          console.log(res.data);
           this.data = this.data.concat(res.data.data.list)
+          if (this.page > res.data.data.total / this.limit) {
+            this.hasMore = false
+          }
         }
       }).catch((err) => {
         console.log(err);
       })
     },
     // 跳转到评论页
-    selectItem(item) {
+    goTo(item) {
       this.$router.push({
         path: `/news/${item.id}`,
         name: 'comment',
+        query: {data: item}
+      })
+    },
+    // 跳转到详情页
+    selectItem(item) {
+      this.$router.push({
+        path: `/news/detail/${item.id}`,
+        name: 'newsdetail',
         query: {data: item}
       })
     }
@@ -106,8 +118,9 @@ export default {
 
 <style lang="stylus" rel="stylesheet/stylus" scoped>
   .news {
-    height: 720px
+    height: 700px
     overflow: hidden
+    margin-top: 10%
   }
   .box-img {
     display: flex;

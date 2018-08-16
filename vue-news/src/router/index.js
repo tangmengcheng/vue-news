@@ -3,8 +3,10 @@ import Router from 'vue-router';
 import Video from '@/components/video/Video';
 import News from '@/components/news/News';
 import BaoMing from '@/components/baoming/Baoming';
+import NewsDetail from '@/components/newsdetail/NewsDetails';
 import Comment from '@/components/comment/Comment';
-import VideoNewDetail from '../components/video/VideoNewsDetail';
+import VideoNewDetail from '@/components/video/VideoNewsDetail';
+import BaoMDetail from '@/components/baoming/BmDetail';
 import '../../static/css/reset.css'
 import '../common/stylus/icon.styl'
 Vue.use(Router)
@@ -31,13 +33,25 @@ export default new Router({
           path: ':id',
           name: 'comment',
           component: Comment
+        },
+        {
+          path: '/detail:id',
+          name: 'newsdetail',
+          component: NewsDetail
         }
       ]
     },
     {
       path: '/baoming',
       name: 'baoming',
-      component: BaoMing
+      component: BaoMing,
+      children: [
+        {
+          path: '/detail:id',
+          name: 'bmdetail',
+          component: BaoMDetail
+        }
+      ]
     },
     {
       path: '/video/detail',

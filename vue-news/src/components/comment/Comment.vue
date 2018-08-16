@@ -26,7 +26,7 @@
         <ul>
           <li class="box" v-for="(item, index) in list" :key="index">
             <div style="position:relative;margin-top: 0.5rem;display: flex;flex-direction: row;width: 100%;">
-              <div class="left" style="width:6%;display:flex;justify-items: center">
+              <div class="left" style="width:6%;display:flex;justify-items: center;">
                 <div v-if="item.userAvatar !== null">
                   <img :src="domain + item.userAvatar" width="22" height="22" style="border-radius: 11px"/>
                 </div>
@@ -35,15 +35,15 @@
                 </div>
               </div>
               <div class="right" style="width:90%;">
-                <div class="name" style="font-size: 14px;margin-left: 0.3rem">{{item.userNickname}}</div>
+                <div class="name" style="font-size: 14px;margin-left: 0.3rem;height: 1.4rem;line-height: 1.4rem">{{item.userNickname}}</div>
                 <div class="zan" style="width:2.3rem;display: flex;flex-direction: row;position: absolute;right: 1rem;top: 0.1rem">
-                  <div class="num">{{item.likeCount}}</div>
+                  <div class="num" style="height: 1.4rem;line-height: 1.4rem">{{item.likeCount}}</div>
                   <div @click="zan(item)">
                     <img src="../../images/zans.png" style="position: absolute;right: 0.2rem;top: 0.1rem" width="18" height="18"/>
                   </div>
                 </div>
                 <div class="content" style="width: 100%;height: 3.15rem;display: flex;justify-content: center">
-                  <div class="content-item" style="margin-top: 0.6rem;background: red;width: 98%;height: 3.15rem;font-size: 13px;letter-spacing: 1px">
+                  <div class="content-item" style="width: 98%;height: 3.15rem;font-size: 13px;letter-spacing: 1px">
                     {{base64.Base64.decode(item.comment)}}
                   </div>
                 </div>
@@ -55,6 +55,7 @@
               </div>
             </div>
           </li>
+          <loading v-show="hasMore" title="正在加载..."></loading>
         </ul>
       </scroll>
       <div class="no-result" v-show="!list.length">
@@ -74,7 +75,6 @@ export default {
   name: "Comment",
   created() {
     this.data = this.$route.query.data
-    console.log(this.data);
     this.fetchComm()
   },
   data() {
@@ -85,7 +85,7 @@ export default {
       domain: 'http://118.126.114.120:9001/static/upload/',
       list: [],
       page: 1,
-      limit: 5,
+      limit: 8,
       beforeScroll: true,
       pullup: true,
       pulldown: true,
@@ -93,11 +93,27 @@ export default {
     }
   },
   methods: {
+    // 点赞
+    zan(item) {
+      let data = {
+        news_comment_id: item.id,
+        operation: 0
+      }
+      this.$ajax.post(`/spot/dataNews/detail/comment/operation`, data).then((res) => {
+        console.log(res)
+      }).catch((err) => {
+        console.log(err)
+      })
+    },
     // 请求评论列表
     fetchComm() {
-      this.$ajax.get(`/api/dataNews/detail/comment/list?id=${this.data.id}&page=${this.page}&limit=${this.limit}`).then((res) => {
+      this.$ajax.get(`/spot/dataNews/detail/comment/list?id=${this.data.id}&page=${this.page}&limit=${this.limit}`).then((res) => {
         console.log(res.data)
         this.list = res.data.data.list
+        if (this.list.length === 0) {
+          this.hasMore = false
+        }
+        this.hasMore = false
       }).catch((err) => {
         console.log(err)
       })
@@ -108,21 +124,15 @@ export default {
         return
       }
       this.page++;
-      this.$ajax.get(`/api/dataNews/detail/comment/list?id=${this.data.id}&page=${this.page}&limit=${this.limit}`).then((res) => {
+      this.$ajax.get(`/spot/dataNews/detail/comment/list?id=${this.data.id}&page=${this.page}&limit=${this.limit}`).then((res) => {
         console.log(res.data)
-        this.list = res.data.data.list
+        this.list = this.list.concat(res.data.data.list)
         if (this.page > res.data.data.total / this.limit) {
           this.hasMore = false
         }
       }).catch((err) => {
         console.log(err)
       })
-    },
-    show() {
-      this.showFlag = true
-    },
-    close() {
-      this.showFlag = false
     }
   },
   filters: {
@@ -186,11 +196,17 @@ export default {
       padding-left: 5px
     .list
       width: 97%
-      height: 720px
+      height: 600px
       overflow: hidden
       margin-left: 1.5%
+      margin-top: 1.5%
     .no-result
-      text-align: center
+      position: fixed
+      top: 50%
+      left: 50%
+      -webkit-transform: translate(-50%,-50%);
+      -moz-transform: translate(-50%,-50%);
+      transform: translate(-50%,-50%);
       .no-result-text
         margin-top: 30px
         font-size: 14px
