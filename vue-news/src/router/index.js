@@ -4,6 +4,7 @@ import Video from '@/components/video/Video';
 import News from '@/components/news/News';
 import BaoMing from '@/components/baoming/Baoming';
 import Comment from '@/components/comment/Comment';
+import VideoNewDetail from '../components/video/VideoNewsDetail';
 import '../../static/css/reset.css'
 import '../common/stylus/icon.styl'
 Vue.use(Router)
@@ -37,6 +38,11 @@ export default new Router({
       path: '/baoming',
       name: 'baoming',
       component: BaoMing
+    },
+    {
+      path: '/video/detail',
+      name: 'videoDetail',
+      component: VideoNewDetail
     }
   ]
 })

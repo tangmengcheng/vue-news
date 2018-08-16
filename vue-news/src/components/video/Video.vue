@@ -12,7 +12,7 @@
       <ul>
         <li v-for="(item, index) in data" :key="index">
           <div class="content-wrapper">
-            <div class="bg-img">
+            <div class="bg-img" @click="_toDetail(item)">
               <p class="title">{{item.title}}</p>
               <img class="bg" :src="_tagsToImg(item.tags)" width="100%" height="100%"/>
               <img class="play" src="../../images/play.png" width="50" height="50"/>
@@ -92,9 +92,21 @@ export default {
       this.$ajax.get(`/api/dataNews/list.json?page=${this.page}&limit=${this.limit}&category=${this.category}`).then((res) => {
         if (res.data.success) {
           this.data = this.data.concat(res.data.data.list)
+          if (this.page > res.data.data.total / this.limit) {
+            this.hasMore = false
+          }
         }
       }).catch((err) => {
         console.log(err);
+      })
+    },
+    _toDetail(item) {
+      this.$router.push({
+        path: '/video/detail',
+        name: 'videoDetail',
+        params: {
+          data: item
+        }
       })
     }
   },
@@ -107,7 +119,7 @@ export default {
 
 <style lang="stylus" rel="stylesheet/stylus" scoped>
   .video {
-    height: 720px;
+    height: 700px;
     overflow: hidden;
   }
   .mint-navbar .page-part {

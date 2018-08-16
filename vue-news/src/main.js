@@ -4,8 +4,10 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import axios from 'axios'
+import config from './common/config'
 
 Vue.prototype.$ajax = axios
+Vue.prototype.$cfig = config
 Vue.config.productionTip = false
 
 /* eslint-disable no-new */
