@@ -1,34 +1,45 @@
 <template>
-  <div class="video" ref="video">
-    <ul>
-      <li v-for="(item, index) in data" :key="index">
-        <div class="content-wrapper">
-          <div class="bg-img">
-            <p class="title">{{item.title}}</p>
-            <img class="bg" :src="_tagsToImg(item.tags)" width="100%" height="100%"/>
-            <img class="play" src="../../images/play.png" width="50" height="50"/>
-          </div>
-          <div class="tip-wrapper">
-            <div class="tip">
-              <span class="tip-img"></span>
-              <span class="tip-title">{{_tagsToName(item.tags)}}</span>
+  <scroll
+    class="video"
+    :data="data"
+    :beforeScroll="beforeScroll"
+    :pullup="pullup"
+    :pulldown="pulldown"
+    @scrollToEnd="loadMore"
+    @pulldown="loadData"
+    ref="video"
+  >
+      <ul>
+        <li v-for="(item, index) in data" :key="index">
+          <div class="content-wrapper">
+            <div class="bg-img">
+              <p class="title">{{item.title}}</p>
+              <img class="bg" :src="_tagsToImg(item.tags)" width="100%" height="100%"/>
+              <img class="play" src="../../images/play.png" width="50" height="50"/>
             </div>
-            <div class="comment">
-              <div @click.stop="goTo(item)">
-                <img class="comment-img" src="../../images/comment.png" width="20" height="20"/>
+            <div class="tip-wrapper">
+              <div class="tip">
+                <span class="tip-img"></span>
+                <span class="tip-title">{{_tagsToName(item.tags)}}</span>
               </div>
-              <span class="comment-count">{{item.comment_count}}</span>
-              <img class="comment-img" src="../../images/dian.png" width="20" height="20"/>
+              <div class="comment">
+                <div @click.stop="goTo(item)">
+                  <img class="comment-img" src="../../images/comment.png" width="20" height="20"/>
+                </div>
+                <span class="comment-count">{{item.comment_count}}</span>
+                <img class="comment-img" src="../../images/dian.png" width="20" height="20"/>
+              </div>
             </div>
           </div>
-        </div>
-      </li>
-    </ul>
-  </div>
+        </li>
+        <loading v-show="hasMore" title="正在加载..."></loading>
+      </ul>
+  </scroll>
 </template>
 
 <script>
-import BScroll from 'better-scroll'
+import Scroll from '../scroll/Scroll'
+import Loading from '../loading/Loading'
 export default {
   name: "Video",
   data() {
@@ -37,20 +48,31 @@ export default {
       limit: 5,
       data: [],
       category: 'video',
-      domain: 'http://118.126.114.120:9001/static/upload/'
+      domain: 'http://118.126.114.120:9001/static/upload/',
+      beforeScroll: true,
+      pullup: true,
+      pulldown: true,
+      hasMore: true
     }
   },
-  mounted() {
-    this.$ajax.get(`/api/dataNews/list.json?page=${this.page}&limit=${this.limit}&category=${this.category}`).then((res) => {
-      if (res.data.success) {
-        this.data = res.data.data.list
-      }
-      // console.log(res);
-    }).catch((err) => {
-      console.log(err);
-    })
+  created() {
+    this.loadData()
   },
   methods: {
+    loadData() {
+      this.$ajax.get(`/api/dataNews/list.json?page=${this.page}&limit=${this.limit}&category=${this.category}`).then((res) => {
+        if (res.data.success) {
+          if (res.data.success) {
+            this.data = this.data.concat(res.data.data.list)
+          }
+        }
+      }).catch((err) => {
+        console.log(err);
+      })
+    },
+    refresh () {
+      this.$refs.video.refresh()
+    },
     _tagsToImg (tags) {
       let tagsObj = JSON.parse(tags)
       let img = tagsObj.pic
@@ -61,11 +83,33 @@ export default {
       let name = tagsObj.name
       return name
     },
+    // 加载更多
+    loadMore() {
+      if (!this.hasMore) {
+        return
+      }
+      this.page++;
+      this.$ajax.get(`/api/dataNews/list.json?page=${this.page}&limit=${this.limit}&category=${this.category}`).then((res) => {
+        if (res.data.success) {
+          this.data = this.data.concat(res.data.data.list)
+        }
+      }).catch((err) => {
+        console.log(err);
+      })
+    }
+  },
+  components: {
+    Loading,
+    Scroll
   }
 }
 </script>
 
 <style lang="stylus" rel="stylesheet/stylus" scoped>
+  .video {
+    height: 720px;
+    overflow: hidden;
+  }
   .mint-navbar .page-part {
     position: fixed;
     top: 40px;

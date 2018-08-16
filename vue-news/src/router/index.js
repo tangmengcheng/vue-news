@@ -24,17 +24,19 @@ export default new Router({
     {
       path: '/news',
       name: 'news',
-      component: News
+      component: News,
+      children: [
+        {
+          path: ':id',
+          name: 'comment',
+          component: Comment
+        }
+      ]
     },
     {
       path: '/baoming',
       name: 'baoming',
       component: BaoMing
-    },
-    {
-      path: '/news/:id',
-      name: 'comment',
-      component: Comment
     }
   ]
 })

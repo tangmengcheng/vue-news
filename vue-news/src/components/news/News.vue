@@ -1,36 +1,49 @@
 <template>
-    <div class="news">
-      <div ref="news">
-        <ul>
-          <li class="box" v-for="(item, index) in data" :key="index" @click="selectItem(item)">
-            <div class="wrapper">
-              <div class="left-wrapper">
-                <div class="box-text">{{item.title}}</div>
-                <div class="bottom-wrapper">
-                  <div class="box-time">
-                    {{
-                    new Date(item.publishTime).getMonth() + 1 + '月' + new Date(item.publishTime).getDate() + '日'
-                    }}
+  <div>
+    <scroll
+      class="news"
+      ref="news"
+      :data="data"
+      :beforeScroll="beforeScroll"
+      :pullup="pullup"
+      :pulldown="pulldown"
+      @scrollToEnd="loadMore"
+      @pulldown="loadData"
+    >
+      <ul>
+        <li class="box" v-for="(item, index) in data" :key="index" @click="selectItem(item)">
+          <div class="wrapper">
+            <div class="left-wrapper">
+              <div class="box-text">{{item.title}}</div>
+              <div class="bottom-wrapper">
+                <div class="box-time">
+                  {{
+                  new Date(item.publishTime).getMonth() + 1 + '月' + new Date(item.publishTime).getDate() + '日'
+                  }}
+                </div>
+                <div class="box-img">
+                  <div>
+                    <img src="../../images/comment.png" alt="">
                   </div>
-                  <div class="box-img">
-                    <div>
-                      <img src="../../images/comment.png" alt="">
-                    </div>
-                    <div class="txt">{{item.comment_count}}</div>
-                  </div>
+                  <div class="txt">{{item.comment_count}}</div>
                 </div>
               </div>
-              <div class="right-wrapper">
-                <img :src="domain+item.videoUrl" alt="">
-              </div>
             </div>
-          </li>
-        </ul>
-      </div>
-    </div>
+            <div class="right-wrapper">
+              <img :src="domain+item.videoUrl" alt="">
+            </div>
+          </div>
+        </li>
+        <loading v-show="hasMore" title="正在加载..."></loading>
+      </ul>
+    </scroll>
+    <router-view></router-view>
+  </div>
 </template>
 
 <script>
+import Scroll from '../scroll/Scroll'
+import Loading from '../loading/Loading'
 export default {
   name: "News",
   data() {
@@ -40,33 +53,62 @@ export default {
       data: [],
       category: 'welfare',
       domain: 'http://118.126.114.120:9001/static/upload/',
-      commentObj: {}
+      commentObj: {},
+      beforeScroll: true,
+      pullup: true,
+      pulldown: true,
+      hasMore: true
     }
   },
-  mounted() {
-    this.$ajax.get(`/api/dataNews/list.json?page=${this.page}&limit=${this.limit}&category=${this.category}`).then((res) => {
-      if (res.data.success) {
-        this.data = res.data.data.list
-      }
-      // console.log(res);
-    }).catch((err) => {
-      console.log(err);
-    })
+  created() {
+    this.loadData()
   },
   methods: {
+    loadData() {
+      this.$ajax.get(`/api/dataNews/list.json?page=${this.page}&limit=${this.limit}&category=${this.category}`).then((res) => {
+        if (res.data.success) {
+          this.data = this.data.concat(res.data.data.list)
+        }
+        // console.log(res);
+      }).catch((err) => {
+        console.log(err);
+      })
+    },
+    // 加载更多
+    loadMore() {
+      if (!this.hasMore) {
+        return
+      }
+      this.page++;
+      this.$ajax.get(`/api/dataNews/list.json?page=${this.page}&limit=${this.limit}&category=${this.category}`).then((res) => {
+        if (res.data.success) {
+          this.data = this.data.concat(res.data.data.list)
+        }
+      }).catch((err) => {
+        console.log(err);
+      })
+    },
     // 跳转到评论页
     selectItem(item) {
       this.$router.push({
-        path: `/news/${item.id}`
+        path: `/news/${item.id}`,
+        name: 'comment',
+        query: {data: item}
       })
-      // this.commentObj = item
-      // this.$refs.comment.show()
     }
+  },
+  components: {
+    Loading,
+    Scroll
   }
 }
 </script>
 
 <style lang="stylus" rel="stylesheet/stylus" scoped>
+  .news {
+    height: 720px
+    overflow: hidden
+  }
   .box-img {
     display: flex;
     flex-direction: row;

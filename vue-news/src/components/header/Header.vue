@@ -1,6 +1,6 @@
 <template>
   <div class="header">
-    <div class="back">
+    <div class="back" @click="back">
       <i class="icon-arrow_lift"></i>
     </div>
   </div>
@@ -12,6 +12,11 @@ export default {
   data() {
     return {
       showFlag: false
+    }
+  },
+  methods: {
+    back () {
+      this.$router.back()
     }
   }
 }
